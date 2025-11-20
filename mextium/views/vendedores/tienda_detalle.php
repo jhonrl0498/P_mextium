@@ -69,9 +69,26 @@ if ($tienda && isset($tienda['id'])) {
         $productos = [];
     }
 }
+
+if ($tienda && isset($tienda['usuario_id'])) {
+    // Incrementar visitas de la tienda
+    try {
+        $stmt = $pdo->prepare("UPDATE vendedores SET visitas_tienda = visitas_tienda + 1 WHERE usuario_id = ?");
+        $stmt->execute([$tienda['usuario_id']]);
+
+        // Recuperar el contador actualizado
+        $stmt2 = $pdo->prepare("SELECT visitas_tienda FROM vendedores WHERE usuario_id = ?");
+        $stmt2->execute([$tienda['usuario_id']]);
+        $contadorVisitas = $stmt2->fetchColumn();
+    } catch (Throwable $e) {
+        echo '<div style="padding:2rem;color:orange;">Excepción: ' . htmlspecialchars($e->getMessage()) . '</div>';
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -86,6 +103,7 @@ if ($tienda && isset($tienda['id'])) {
             min-height: 100vh;
             margin: 0;
         }
+
         .tienda-header {
             background: linear-gradient(135deg, #5FAAFF 0%, #4A90E2 100%);
             color: white;
@@ -93,16 +111,18 @@ if ($tienda && isset($tienda['id'])) {
             text-align: center;
             position: relative;
         }
+
         .tienda-header .store-img {
             width: 120px;
             height: 120px;
             object-fit: cover;
             border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(95,170,255,0.18);
+            box-shadow: 0 8px 32px rgba(95, 170, 255, 0.18);
             border: 4px solid #fff;
             margin-bottom: 1rem;
             background: #f8f9fa;
         }
+
         .tienda-header .verified {
             display: inline-block;
             background: linear-gradient(135deg, #00d4aa, #00c4a7);
@@ -113,19 +133,23 @@ if ($tienda && isset($tienda['id'])) {
             font-weight: 600;
             margin-left: 0.5rem;
         }
+
         .tienda-header .unverified {
             background: linear-gradient(135deg, #ff6b6b, #ee5a24);
         }
+
         .tienda-header h1 {
             font-size: 2.2rem;
             font-weight: 800;
             margin-bottom: 0.3rem;
         }
+
         .tienda-header .owner {
             font-size: 1.1rem;
             font-weight: 600;
             color: #e0eaff;
         }
+
         .tienda-header .desc {
             font-size: 1.05rem;
             color: #f8f9fa;
@@ -134,10 +158,11 @@ if ($tienda && isset($tienda['id'])) {
             margin-left: auto;
             margin-right: auto;
         }
+
         .tienda-info {
             background: #fff;
             border-radius: 16px;
-            box-shadow: 0 4px 18px rgba(95,170,255,0.10);
+            box-shadow: 0 4px 18px rgba(95, 170, 255, 0.10);
             margin: -2rem auto 2rem auto;
             max-width: 1200px;
             width: 100%;
@@ -145,31 +170,38 @@ if ($tienda && isset($tienda['id'])) {
             position: relative;
             z-index: 2;
         }
-        .tienda-info .row > div {
+
+        .tienda-info .row>div {
             margin-bottom: 0.7rem;
         }
+
         .tienda-info .info-label {
             color: #4A90E2;
             font-weight: 600;
             font-size: 0.98rem;
             margin-bottom: 0.1rem;
         }
+
         .tienda-info .info-value {
             color: #222;
             font-weight: 500;
             font-size: 0.97rem;
         }
+
         @media (max-width: 600px) {
             .tienda-header h1 {
                 font-size: 1.3rem;
             }
+
             .tienda-header .desc {
                 font-size: 0.98rem;
             }
+
             .tienda-info {
                 padding: 1.2rem 0.7rem 1rem 0.7rem;
             }
         }
+
         .tienda-info-row {
             display: flex;
             flex-direction: row;
@@ -179,26 +211,31 @@ if ($tienda && isset($tienda['id'])) {
             gap: 1.2rem;
             padding: 0.5rem 0;
         }
+
         .min-width-info {
             min-width: 140px;
             flex: 1 1 0;
             max-width: 200px;
         }
+
         @media (max-width: 900px) {
             .tienda-info-row {
                 flex-wrap: wrap;
                 gap: 0.5rem;
             }
+
             .min-width-info {
                 flex: 1 1 180px;
                 max-width: 100%;
             }
         }
+
         @media (max-width: 600px) {
             .tienda-info-row {
                 flex-direction: column;
                 gap: 0.2rem;
             }
+
             .min-width-info {
                 min-width: 0;
                 max-width: 100%;
@@ -215,7 +252,7 @@ if ($tienda && isset($tienda['id'])) {
             margin-right: auto;
             min-height: 410px;
             max-height: 410px;
-            box-shadow: 0 8px 32px rgba(80,120,180,0.13), 0 2px 8px rgba(80,80,80,0.07);
+            box-shadow: 0 8px 32px rgba(80, 120, 180, 0.13), 0 2px 8px rgba(80, 80, 80, 0.07);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -223,10 +260,12 @@ if ($tienda && isset($tienda['id'])) {
             border: none;
             transition: box-shadow 0.28s, transform 0.22s;
         }
+
         .product-card:hover {
-            box-shadow: 0 16px 48px rgba(95,170,255,0.18), 0 4px 16px rgba(80,80,80,0.13);
+            box-shadow: 0 16px 48px rgba(95, 170, 255, 0.18), 0 4px 16px rgba(80, 80, 80, 0.13);
             transform: translateY(-7px) scale(1.035);
         }
+
         .product-card .card-img-top {
             width: 92%;
             height: 180px;
@@ -237,15 +276,17 @@ if ($tienda && isset($tienda['id'])) {
             border-radius: 20px;
             margin-top: 0.7rem;
             margin-bottom: 1.1rem;
-            box-shadow: 0 4px 18px rgba(95,170,255,0.10);
+            box-shadow: 0 4px 18px rgba(95, 170, 255, 0.10);
             border: 2px solid #e0e0e0;
             background: #f5f5f5;
             transition: filter 0.2s, box-shadow 0.2s;
         }
+
         .product-card:hover .card-img-top {
             filter: brightness(1.09) saturate(1.13);
-            box-shadow: 0 8px 32px rgba(95,170,255,0.18);
+            box-shadow: 0 8px 32px rgba(95, 170, 255, 0.18);
         }
+
         .product-card .card-body {
             padding: 0 1.2rem 0 1.2rem;
             display: flex;
@@ -254,6 +295,7 @@ if ($tienda && isset($tienda['id'])) {
             flex: 1 1 auto;
             width: 100%;
         }
+
         .product-card .card-title {
             font-size: 1.22rem;
             font-weight: 800;
@@ -270,6 +312,7 @@ if ($tienda && isset($tienda['id'])) {
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .product-card .card-text {
             font-size: 1.01rem;
             color: #6a6a7a;
@@ -285,6 +328,7 @@ if ($tienda && isset($tienda['id'])) {
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .product-card .product-footer {
             display: flex;
             flex-direction: column;
@@ -293,6 +337,7 @@ if ($tienda && isset($tienda['id'])) {
             gap: 0.7rem;
             width: 100%;
         }
+
         .product-card .product-price {
             font-weight: 900;
             color: #2d44aa;
@@ -300,6 +345,7 @@ if ($tienda && isset($tienda['id'])) {
             letter-spacing: 0.01em;
             text-align: center;
         }
+
         .product-card .btn-comprar {
             width: 90%;
             font-size: 1.07rem;
@@ -309,7 +355,7 @@ if ($tienda && isset($tienda['id'])) {
             color: #fff;
             border: none;
             border-radius: 30px;
-            box-shadow: 0 2px 8px rgba(95,170,255,0.13);
+            box-shadow: 0 2px 8px rgba(95, 170, 255, 0.13);
             transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
             outline: none;
             letter-spacing: 0.5px;
@@ -318,19 +364,32 @@ if ($tienda && isset($tienda['id'])) {
             justify-content: center;
             gap: 0.5em;
         }
+
         .product-card .btn-comprar i {
             font-size: 1.18em;
         }
-        .product-card .btn-comprar:hover, .product-card .btn-comprar:focus {
+
+        .product-card .btn-comprar:hover,
+        .product-card .btn-comprar:focus {
             background: linear-gradient(90deg, #5FAAFF 0%, #2d44aa 100%);
             color: #fff;
             transform: translateY(-2px) scale(1.04);
-            box-shadow: 0 6px 18px rgba(95,170,255,0.18);
+            box-shadow: 0 6px 18px rgba(95, 170, 255, 0.18);
         }
     </style>
 </head>
+
 <body>
     <div class="tienda-header">
+        <div class="card text-white bg-primary"
+            style="position: absolute; top: 10px; right: 10px; width: 200px;">
+            <div class="card-header">Visitas a la Tienda</div>
+            <div class="card-body">
+                <h5 class="card-title">
+                    <?php echo htmlspecialchars($contadorVisitas); ?>
+                </h5>
+            </div>
+        </div>
         <img class="store-img" src="<?php echo !empty($tienda['imagen']) ? ('/mextium/' . ltrim($tienda['imagen'], '/')) : '../no-image.png'; ?>" alt="Imagen de la tienda">
         <h1>
             <?php echo htmlspecialchars($tienda['nombre_tienda']); ?>
@@ -350,36 +409,36 @@ if ($tienda && isset($tienda['id'])) {
         <?php endif; ?>
     </div>
     <div class="tienda-info">
-            <div class="tienda-info-row">
-                <div class="min-width-info">
-                    <div class="info-label"><i class="fas fa-map-marker-alt"></i> Dirección</div>
-                    <div class="info-value"><?php echo htmlspecialchars($tienda['direccion']); ?></div>
-                </div>
-                <div class="min-width-info">
-                    <div class="info-label"><i class="fas fa-city"></i> Ciudad</div>
-                    <div class="info-value"><?php echo htmlspecialchars($tienda['ciudad']); ?></div>
-                </div>
-                <div class="min-width-info">
-                    <div class="info-label"><i class="fas fa-envelope"></i> Email</div>
-                    <div class="info-value"><?php echo htmlspecialchars($tienda['email'] ?? 'N/D'); ?></div>
-                </div>
-                <div class="min-width-info">
-                    <div class="info-label"><i class="fas fa-phone"></i> Teléfono</div>
-                    <div class="info-value"><?php echo htmlspecialchars($tienda['telefono'] ?? 'N/D'); ?></div>
-                </div>
-                <div class="min-width-info">
-                    <div class="info-label"><i class="fas fa-calendar-alt"></i> Apertura</div>
-                    <div class="info-value"><?php echo !empty($tienda['fecha_creacion']) ? date('d M Y', strtotime($tienda['fecha_creacion'])) : 'N/D'; ?></div>
-                </div>
-                <div class="min-width-info">
-                    <div class="info-label"><i class="fas fa-star"></i> Calificación</div>
-                    <div class="info-value"><?php echo isset($tienda['calificacion_promedio']) ? number_format($tienda['calificacion_promedio'], 1) : 'N/D'; ?></div>
-                </div>
-                <div class="min-width-info">
-                    <div class="info-label"><i class="fas fa-shopping-cart"></i> Ventas</div>
-                    <div class="info-value"><?php echo isset($tienda['total_ventas']) ? number_format($tienda['total_ventas']) : 'N/D'; ?></div>
-                </div>
+        <div class="tienda-info-row">
+            <div class="min-width-info">
+                <div class="info-label"><i class="fas fa-map-marker-alt"></i> Dirección</div>
+                <div class="info-value"><?php echo htmlspecialchars($tienda['direccion']); ?></div>
             </div>
+            <div class="min-width-info">
+                <div class="info-label"><i class="fas fa-city"></i> Ciudad</div>
+                <div class="info-value"><?php echo htmlspecialchars($tienda['ciudad']); ?></div>
+            </div>
+            <div class="min-width-info">
+                <div class="info-label"><i class="fas fa-envelope"></i> Email</div>
+                <div class="info-value"><?php echo htmlspecialchars($tienda['email'] ?? 'N/D'); ?></div>
+            </div>
+            <div class="min-width-info">
+                <div class="info-label"><i class="fas fa-phone"></i> Teléfono</div>
+                <div class="info-value"><?php echo htmlspecialchars($tienda['telefono'] ?? 'N/D'); ?></div>
+            </div>
+            <div class="min-width-info">
+                <div class="info-label"><i class="fas fa-calendar-alt"></i> Apertura</div>
+                <div class="info-value"><?php echo !empty($tienda['fecha_creacion']) ? date('d M Y', strtotime($tienda['fecha_creacion'])) : 'N/D'; ?></div>
+            </div>
+            <div class="min-width-info">
+                <div class="info-label"><i class="fas fa-star"></i> Calificación</div>
+                <div class="info-value"><?php echo isset($tienda['calificacion_promedio']) ? number_format($tienda['calificacion_promedio'], 1) : 'N/D'; ?></div>
+            </div>
+            <div class="min-width-info">
+                <div class="info-label"><i class="fas fa-shopping-cart"></i> Ventas</div>
+                <div class="info-value"><?php echo isset($tienda['total_ventas']) ? number_format($tienda['total_ventas']) : 'N/D'; ?></div>
+            </div>
+        </div>
     </div>
 
     <!-- Productos de la tienda (ejemplo) -->
@@ -390,25 +449,25 @@ if ($tienda && isset($tienda['id'])) {
                 <div class="col-12 text-center text-muted">Esta tienda aún no tiene productos registrados.</div>
             <?php else: ?>
                 <?php foreach ($productos as $producto): ?>
-                <div class="col-12 col-sm-6 col-md-4 mb-4">
-                    <div class="product-card">
-                        <div style="width:92%;height:180px;display:flex;align-items:center;justify-content:center;background:#f5f5f5;border-radius:20px;border:2px solid #e0e0e0;margin-top:0.7rem;margin-bottom:1.1rem;">
-                        <?php if (!empty($producto['imagen']) && file_exists(__DIR__ . '/../../' . ltrim($producto['imagen'], '/'))): ?>
-                            <img src="<?= '../../' . ltrim($producto['imagen'], '/') ?>" style="max-width:100%;max-height:100%;object-fit:contain;" alt="<?= htmlspecialchars($producto['nombre']) ?>">
-                        <?php else: ?>
-                            <img src="../../public/no-image.png" style="max-width:100%;max-height:100%;object-fit:contain;" alt="Sin imagen">
-                        <?php endif; ?>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title"><?= htmlspecialchars($producto['nombre']) ?></h5>
-                            <p class="card-text"><?= htmlspecialchars($producto['descripcion']) ?></p>
-                            <div class="product-footer">
-                                <span class="product-price">$<?= number_format($producto['precio'], 2) ?></span>
-                                <button class="btn-comprar" data-producto-id="<?= htmlspecialchars($producto['id']) ?>"><i class="fas fa-cart-plus"></i>Comprar</button>
+                    <div class="col-12 col-sm-6 col-md-4 mb-4">
+                        <div class="product-card">
+                            <div style="width:92%;height:180px;display:flex;align-items:center;justify-content:center;background:#f5f5f5;border-radius:20px;border:2px solid #e0e0e0;margin-top:0.7rem;margin-bottom:1.1rem;">
+                                <?php if (!empty($producto['imagen']) && file_exists(__DIR__ . '/../../' . ltrim($producto['imagen'], '/'))): ?>
+                                    <img src="<?= '../../' . ltrim($producto['imagen'], '/') ?>" style="max-width:100%;max-height:100%;object-fit:contain;" alt="<?= htmlspecialchars($producto['nombre']) ?>">
+                                <?php else: ?>
+                                    <img src="../../public/no-image.png" style="max-width:100%;max-height:100%;object-fit:contain;" alt="Sin imagen">
+                                <?php endif; ?>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title"><?= htmlspecialchars($producto['nombre']) ?></h5>
+                                <p class="card-text"><?= htmlspecialchars($producto['descripcion']) ?></p>
+                                <div class="product-footer">
+                                    <span class="product-price">$<?= number_format($producto['precio'], 2) ?></span>
+                                    <button class="btn-comprar" data-producto-id="<?= htmlspecialchars($producto['id']) ?>"><i class="fas fa-cart-plus"></i>Comprar</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 <?php endforeach; ?>
             <?php endif; ?>
         </div>
@@ -416,54 +475,57 @@ if ($tienda && isset($tienda['id'])) {
     <div class="text-center mb-4">
         <a href="catalogo_vendedores.php" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-1"></i> Volver al catálogo</a>
     </div>
-</style>
+    </style>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-// Notificación flotante
-function mostrarNotificacion(mensaje, exito = true) {
-    let notif = document.createElement('div');
-    notif.textContent = mensaje;
-    notif.style.position = 'fixed';
-    notif.style.top = '30px';
-    notif.style.right = '30px';
-    notif.style.zIndex = 9999;
-    notif.style.background = exito ? 'linear-gradient(90deg,#00d4aa,#5FAAFF)' : '#ff6b6b';
-    notif.style.color = '#fff';
-    notif.style.padding = '1rem 2rem';
-    notif.style.borderRadius = '30px';
-    notif.style.boxShadow = '0 4px 18px rgba(95,170,255,0.13)';
-    notif.style.fontWeight = '700';
-    notif.style.fontSize = '1.05rem';
-    notif.style.opacity = '0.97';
-    document.body.appendChild(notif);
-    setTimeout(() => {
-        notif.style.transition = 'opacity 0.5s';
-        notif.style.opacity = '0';
-        setTimeout(() => notif.remove(), 500);
-    }, 1800);
-}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Notificación flotante
+        function mostrarNotificacion(mensaje, exito = true) {
+            let notif = document.createElement('div');
+            notif.textContent = mensaje;
+            notif.style.position = 'fixed';
+            notif.style.top = '30px';
+            notif.style.right = '30px';
+            notif.style.zIndex = 9999;
+            notif.style.background = exito ? 'linear-gradient(90deg,#00d4aa,#5FAAFF)' : '#ff6b6b';
+            notif.style.color = '#fff';
+            notif.style.padding = '1rem 2rem';
+            notif.style.borderRadius = '30px';
+            notif.style.boxShadow = '0 4px 18px rgba(95,170,255,0.13)';
+            notif.style.fontWeight = '700';
+            notif.style.fontSize = '1.05rem';
+            notif.style.opacity = '0.97';
+            document.body.appendChild(notif);
+            setTimeout(() => {
+                notif.style.transition = 'opacity 0.5s';
+                notif.style.opacity = '0';
+                setTimeout(() => notif.remove(), 500);
+            }, 1800);
+        }
 
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.btn-comprar').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            let productoId = this.getAttribute('data-producto-id');
-            fetch('/mextium/controller/carrito_agregar_controller.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'producto_id=' + encodeURIComponent(productoId) + '&cantidad=1'
-            })
-            .then(res => res.json())
-            .then(data => {
-                mostrarNotificacion(data.message, data.success);
-            })
-            .catch(() => mostrarNotificacion('Error al agregar al carrito', false));
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.btn-comprar').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let productoId = this.getAttribute('data-producto-id');
+                    fetch('/mextium/controller/carrito_agregar_controller.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: 'producto_id=' + encodeURIComponent(productoId) + '&cantidad=1'
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            mostrarNotificacion(data.message, data.success);
+                        })
+                        .catch(() => mostrarNotificacion('Error al agregar al carrito', false));
+                });
+            });
         });
-    });
-});
-</script>
-</style>
+    </script>
+    </style>
 
 </body>
+
 </html>

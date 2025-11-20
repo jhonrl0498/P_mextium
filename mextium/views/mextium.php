@@ -24,7 +24,7 @@ if (isset($_SESSION['user_id'])) {
     $tiendaModel = new TiendaModel();
     $miTienda = $tiendaModel->obtenerTiendaPorUsuarioId($_SESSION['user_id']);
 }
-    // (Redirección a verificación de cédula deshabilitada temporalmente)
+// (Redirección a verificación de cédula deshabilitada temporalmente)
 
 // Obtener todas las tiendas y productos para mostrar en la página principal
 $tiendaModel = new TiendaModel();
@@ -47,9 +47,29 @@ try {
 } catch (Exception $e) {
     $productos = [];
 }
+
+// --- CONTADOR DE VISITAS GLOBAL ---
+$conexion = new mysqli("82.197.82.93", "u366162802_santiago", "vU7=5WEQXw", "u366162802_santiago");
+if ($conexion->connect_error) {
+    die("Error de conexión: " . $conexion->connect_error);
+}
+
+$pagina = "principal"; // nombre identificador de la página
+
+$resultado = $conexion->query("SELECT visitas FROM contador_visitas WHERE pagina='$pagina'");
+if ($resultado->num_rows > 0) {
+    $conexion->query("UPDATE contador_visitas SET visitas = visitas + 1 WHERE pagina='$pagina'");
+    $fila = $resultado->fetch_assoc();
+    $visitas = $fila['visitas'] + 1;
+} else {
+    $conexion->query("INSERT INTO contador_visitas (pagina, visitas) VALUES ('$pagina', 1)");
+    $visitas = 1;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -65,33 +85,33 @@ try {
             --light-color: #f8f9fa;
             --gradient-primary: linear-gradient(135deg, #2d44aa 0%, #2d44aa 100%);
             --gradient-secondary: linear-gradient(135deg, #13469d 0%, #13469d 100%);
-            --shadow-card: 0 8px 25px rgba(0,0,0,0.1);
+            --shadow-card: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             overflow-x: hidden;
         }
-        
+
         /* Header Moderno */
         .navbar-modern {
-            background: rgba(255,255,255,0.95);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
         }
-        
+
         .navbar-modern.scrolled {
-            background: rgba(255,255,255,0.98);
-            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
         }
-        
+
         .logo-brand {
             font-size: 1.8rem;
             font-weight: 800;
@@ -100,7 +120,7 @@ try {
             -webkit-text-fill-color: transparent;
             text-decoration: none;
         }
-        
+
         .nav-link {
             color: var(--dark-color) !important;
             font-weight: 500;
@@ -108,13 +128,13 @@ try {
             border-radius: 8px;
             transition: all 0.3s ease;
         }
-        
+
         .nav-link:hover {
             background: var(--gradient-primary);
             color: white !important;
             transform: translateY(-2px);
         }
-        
+
         .btn-primary-gradient {
             background: var(--gradient-primary);
             border: none;
@@ -124,12 +144,12 @@ try {
             font-weight: 600;
             transition: all 0.3s ease;
         }
-        
+
         .btn-primary-gradient:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
-        
+
         /* Hero Section Ultra Moderno */
         .hero-section {
             min-height: 100vh;
@@ -139,7 +159,7 @@ try {
             position: relative;
             overflow: hidden;
         }
-        
+
         .hero-section::before {
             content: '';
             position: absolute;
@@ -150,17 +170,24 @@ try {
             background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="a" cx="50%" cy="50%"><stop offset="0%" stop-color="%23ffffff" stop-opacity="0.1"/><stop offset="100%" stop-color="%23ffffff" stop-opacity="0"/></radialGradient></defs><circle cx="200" cy="200" r="150" fill="url(%23a)"/><circle cx="800" cy="300" r="100" fill="url(%23a)"/><circle cx="400" cy="700" r="200" fill="url(%23a)"/></svg>');
             animation: float 20s ease-in-out infinite;
         }
-        
+
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
         }
-        
+
         .hero-content {
             position: relative;
             z-index: 2;
         }
-        
+
         .hero-title {
             font-size: 4rem;
             font-weight: 800;
@@ -168,28 +195,28 @@ try {
             line-height: 1.2;
             margin-bottom: 1.5rem;
         }
-        
+
         .hero-subtitle {
             font-size: 1.3rem;
-            color: rgba(255,255,255,0.9);
+            color: rgba(255, 255, 255, 0.9);
             margin-bottom: 2rem;
         }
-        
+
         .search-hero {
             background: white;
             border-radius: 50px;
             padding: 0.5rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             margin-bottom: 2rem;
         }
-        
+
         .search-hero .form-control {
             border: none;
             padding: 0.8rem 1.5rem;
             font-size: 1.1rem;
             border-radius: 50px;
         }
-        
+
         .search-hero .btn {
             border-radius: 50px;
             padding: 0.8rem 2rem;
@@ -198,7 +225,7 @@ try {
             color: white;
             font-weight: 600;
         }
-        
+
         /* Estadísticas Animadas */
         .stats-section {
             background: white;
@@ -207,7 +234,7 @@ try {
             position: relative;
             z-index: 3;
         }
-        
+
         .stats-card {
             text-align: center;
             padding: 2rem;
@@ -216,12 +243,12 @@ try {
             box-shadow: var(--shadow-card);
             transition: all 0.3s ease;
         }
-        
+
         .stats-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
-        
+
         .stats-number {
             font-size: 3rem;
             font-weight: 800;
@@ -229,13 +256,13 @@ try {
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
+
         /* Categorías Modernas */
         .categories-section {
             padding: 5rem 0;
             background: var(--light-color);
         }
-        
+
         .category-card {
             text-align: center;
             padding: 0;
@@ -247,9 +274,10 @@ try {
             min-height: 220px;
             overflow: hidden;
         }
+
         .category-card h4 {
             color: #fff;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
             margin-bottom: 0;
             text-align: left;
             width: 100%;
@@ -262,21 +290,26 @@ try {
             left: 0;
             z-index: 3;
         }
+
         .category-card .category-title-spacer {
             height: 2.7rem;
         }
+
         .category-card:hover {
             transform: translateY(-10px) scale(1.04);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.18);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
             filter: brightness(1.08);
         }
-        .category-clickable { user-select: none; }
-        
+
+        .category-clickable {
+            user-select: none;
+        }
+
         /* Productos Destacados */
         .products-section {
             padding: 5rem 0;
         }
-        
+
         .product-card {
             border-radius: 20px;
             overflow: hidden;
@@ -284,19 +317,19 @@ try {
             box-shadow: var(--shadow-card);
             transition: all 0.3s ease;
         }
-        
+
         .product-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
-        
+
         .product-image {
             height: 250px;
             background: var(--gradient-primary);
             position: relative;
             overflow: hidden;
         }
-        
+
         .product-badge {
             position: absolute;
             top: 1rem;
@@ -308,41 +341,42 @@ try {
             font-size: 0.8rem;
             font-weight: 600;
         }
-        
+
         .product-info {
             padding: 1.5rem;
         }
-        
+
         .product-price {
             font-size: 1.5rem;
             font-weight: 800;
-            color: #212529; /* Negro Bootstrap */
+            color: #212529;
+            /* Negro Bootstrap */
         }
-        
+
         /* Footer Moderno */
         .footer-modern {
             background: var(--dark-color);
             color: white;
             padding: 4rem 0 2rem;
         }
-        
+
         .footer-brand {
             font-size: 2rem;
             font-weight: 800;
             margin-bottom: 1rem;
         }
-        
+
         .footer-links a {
-            color: rgba(255,255,255,0.7);
+            color: rgba(255, 255, 255, 0.7);
             text-decoration: none;
             transition: all 0.3s ease;
         }
-        
+
         .footer-links a:hover {
             color: white;
             transform: translateX(5px);
         }
-        
+
         .social-links a {
             display: inline-block;
             width: 40px;
@@ -355,17 +389,17 @@ try {
             margin: 0 0.5rem;
             transition: all 0.3s ease;
         }
-        
+
         .social-links a:hover {
             transform: translateY(-3px) scale(1.1);
         }
-        
+
         /* Logo Hero Mejorado */
         .logo-hero-container {
             position: relative;
             padding: 3rem;
         }
-        
+
         .logo-hero-container::before {
             content: '';
             position: absolute;
@@ -378,7 +412,7 @@ try {
             border-radius: 50%;
             animation: pulse 4s ease-in-out infinite;
         }
-        
+
         .logo-hero {
             max-height: 350px;
             max-width: 100%;
@@ -388,108 +422,114 @@ try {
             position: relative;
             z-index: 2;
         }
-        
+
         .logo-hero:hover {
             transform: scale(1.08) rotate(3deg);
             filter: drop-shadow(0 20px 50px rgba(0, 114, 245, 0.6));
         }
-        
+
         @keyframes pulse {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translate(-50%, -50%) scale(1);
                 opacity: 0.4;
             }
+
             50% {
                 transform: translate(-50%, -50%) scale(1.15);
                 opacity: 0.7;
             }
         }
-        
+
         /* Responsive para el logo */
         @media (max-width: 992px) {
             .logo-hero {
                 max-height: 250px;
             }
-            
+
             .logo-hero-container::before {
                 width: 350px;
                 height: 350px;
             }
         }
-        
+
         @media (max-width: 768px) {
             .logo-hero {
                 max-height: 180px;
             }
-            
+
             .logo-hero-container::before {
                 width: 250px;
                 height: 250px;
             }
-            
+
             .logo-hero-container {
                 padding: 2rem;
             }
         }
-        
+
         @media (max-width: 576px) {
             .logo-hero {
                 max-height: 140px;
             }
-            
+
             .logo-hero-container::before {
                 width: 200px;
                 height: 200px;
             }
-            
+
             .logo-hero-container {
                 padding: 1.5rem;
             }
         }
-        
+
         /* Responsive */
         @media (max-width: 768px) {
             .hero-title {
                 font-size: 2.5rem;
             }
-            
+
             .hero-subtitle {
                 font-size: 1.1rem;
             }
-            
+
             .stats-section {
                 margin-top: -50px;
             }
         }
-        
+
         /* Animaciones personalizadas */
         .bounce-in {
             animation: bounceIn 1s ease-out;
         }
-        
+
         @keyframes bounceIn {
             0% {
                 opacity: 0;
                 transform: scale(0.3);
             }
+
             50% {
                 opacity: 1;
                 transform: scale(1.05);
             }
+
             70% {
                 transform: scale(0.9);
             }
+
             100% {
                 opacity: 1;
                 transform: scale(1);
             }
         }
-        
+
         /* Dropdown del usuario */
         .dropdown-menu {
             border-radius: 15px;
             border: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             padding: 0.5rem 0;
             min-width: 250px;
         }
@@ -763,6 +803,7 @@ try {
                 opacity: 0;
                 transform: translateY(30px) scale(0.8);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
@@ -776,7 +817,7 @@ try {
                 font-size: 0.85rem;
                 min-width: 120px;
             }
-            
+
             .categories-section .category-card {
                 height: 280px;
             }
@@ -789,7 +830,7 @@ try {
                 min-width: 100px;
                 gap: 0.5rem;
             }
-            
+
             .categories-section .category-card {
                 height: 260px;
             }
@@ -797,7 +838,7 @@ try {
 
         /* Efecto de brillo sutil */
         .btn-category-enter:hover {
-            box-shadow: 
+            box-shadow:
                 0 8px 25px rgba(102, 126, 234, 0.25),
                 inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
@@ -811,10 +852,19 @@ try {
         .animated-pulse {
             animation: pulse 1.2s infinite;
         }
+
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255,193,7,0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(255,193,7,0.0); }
-            100% { box-shadow: 0 0 0 0 rgba(255,193,7,0.0); }
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 193, 7, 0.0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.0);
+            }
         }
     </style>
 </head>
@@ -824,11 +874,11 @@ try {
     <nav class="navbar navbar-expand-lg navbar-modern fixed-top">
         <div class="container">
             <a class="logo-brand" href="#home">Mextium</a>
-            
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item">
@@ -847,14 +897,14 @@ try {
                         <a class="nav-link" href="../views/Support Center/contactos.php">Contacto</a>
                     </li>
                     <?php if (isset($usuario['rol_id']) && $usuario['rol_id'] == 3): ?>
-                    <li class="nav-item">
-                        <a href="administrador/dashboard.php" class="btn btn-warning d-flex align-items-center fw-bold" style="background: linear-gradient(90deg, #2d44aa 0%, #13469d 100%); color: #fff; border: none; font-size: 1.1rem; letter-spacing: 1px; margin-left: 10px; gap: 6px;">
-                            <i class="fas fa-crown"></i> ADMINISTRACIÓN DE MEXTIUM
-                        </a>
-                    </li>
+                        <li class="nav-item">
+                            <a href="administrador/dashboard.php" class="btn btn-warning d-flex align-items-center fw-bold" style="background: linear-gradient(90deg, #2d44aa 0%, #13469d 100%); color: #fff; border: none; font-size: 1.1rem; letter-spacing: 1px; margin-left: 10px; gap: 6px;">
+                                <i class="fas fa-crown"></i> ADMINISTRACIÓN DE MEXTIUM
+                            </a>
+                        </li>
                     <?php endif; ?>
                 </ul>
-                
+
                 <div class="d-flex align-items-center gap-2">
                     <!-- Carrito de compras -->
                     <a href="../views/productos/carrito.php" class="btn position-relative btn-outline-primary me-2" id="cartBtn" style="border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
@@ -877,7 +927,9 @@ try {
                                         <?php echo htmlspecialchars($usuario['nombre'] . ' ' . $usuario['apellido']); ?>
                                     </h6>
                                 </li>
-                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
                                 <li>
                                     <a class="dropdown-item" href="../views/usuarios/profile.php">
                                         <i class="fas fa-user-edit me-2"></i>Mi Perfil
@@ -907,17 +959,21 @@ try {
                                     </a>
                                 </li>
                                 <!-- Verificación de cédula deshabilitada temporalmente -->
-                                <?php if ($usuario['rol_id'] == 2): // Vendedor ?>
-                                <li>
-                                    <a class="dropdown-item" href="../mis_productos.php">
-                                        <i class="fas fa-store me-2"></i>Mis Productos
-                                    </a>
-                                </li>
+                                <?php if ($usuario['rol_id'] == 2): // Vendedor 
+                                ?>
+                                    <li>
+                                        <a class="dropdown-item" href="../mis_productos.php">
+                                            <i class="fas fa-store me-2"></i>Mis Productos
+                                        </a>
+                                    </li>
                                 <?php endif; ?>
-                                <?php if ($usuario['rol_id'] == 1): // Admin ?>
+                                <?php if ($usuario['rol_id'] == 1): // Admin 
+                                ?>
 
                                 <?php endif; ?>
-                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
                                 <li>
                                     <a class="dropdown-item" href="../views/usuarios/configuracion.php">
                                         <i class="fas fa-cog me-2"></i>Configuración
@@ -952,7 +1008,7 @@ try {
                     <div class="hero-content" data-aos="fade-right">
                         <h1 class="hero-title">compra fácil, recibe rápido</h1>
                         <p class="hero-subtitle">Descubre productos únicos, conecta con vendedores increíbles y vive una experiencia de compra revolucionaria.</p>
-                        
+
                         <div class="search-hero">
                             <div class="input-group">
                                 <input type="text" class="form-control" placeholder="¿Qué estás buscando hoy?">
@@ -961,7 +1017,7 @@ try {
                                 </button>
                             </div>
                         </div>
-                        
+
                         <div class="d-flex gap-3">
                             <a href="#categories" class="btn btn-primary-gradient btn-lg">
                                 <i class="fas fa-rocket"></i> Explorar Ahora
@@ -978,13 +1034,13 @@ try {
                         </div>
                     </div>
                 </div>
-                
 
-            <!-- Removed duplicate 'Ver más productos' button from hero/banner section -->
-        </div>
+
+                <!-- Removed duplicate 'Ver más productos' button from hero/banner section -->
+            </div>
     </section>
 
-    
+
 
     <!-- Categorías Modernas con Carrusel -->
     <section id="categories" class="categories-section">
@@ -993,7 +1049,7 @@ try {
                 <h2 class="display-4 fw-bold">Explora por Categorías</h2>
                 <p class="lead text-muted">Encuentra exactamente lo que necesitas</p>
             </div>
-            
+
             <!-- Carrusel de Categorías -->
             <div class="categories-carousel-container" data-aos="fade-up" data-aos-delay="200">
                 <div id="categoriesCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="8000">
@@ -1035,12 +1091,12 @@ try {
                                 </div>
                             </div>
                         </div>
-                        
-                        </div>
+
                     </div>
-                    
-                    <!-- Controles del carrusel -->
-                    <!--
+                </div>
+
+                <!-- Controles del carrusel -->
+                <!--
                     <button class="carousel-control-prev" type="button" data-bs-target="#categoriesCarousel" data-bs-slide="prev">
                         <div class="carousel-control-icon">
                             <i class="fas fa-chevron-left"></i>
@@ -1054,23 +1110,23 @@ try {
                         <span class="visually-hidden">Siguiente</span>
                     </button>
                     -->
-                </div>
-                
-                <!-- Navegación rápida -->
-                <div class="categories-navigation mt-4 text-center">
-                    <div class="btn-group" role="group" aria-label="Navegación de categorías">
-                        <button type="button" class="btn btn-outline-primary" onclick="goToSlide(0)">
-                            <i class="fas fa-home me-2"></i>Más populares
-                        </button>
-                        <button type="button" class="btn btn-outline-primary" onclick="goToSlide(1)">
-                            <i class="fas fa-star me-2"></i>Novedades
-                        </button>
-                        <button type="button" class="btn btn-outline-primary" onclick="goToSlide(2)">
-                            <i class="fas fa-heart me-2"></i>Recomendados
-                        </button>
-                    </div>
+            </div>
+
+            <!-- Navegación rápida -->
+            <div class="categories-navigation mt-4 text-center">
+                <div class="btn-group" role="group" aria-label="Navegación de categorías">
+                    <button type="button" class="btn btn-outline-primary" onclick="goToSlide(0)">
+                        <i class="fas fa-home me-2"></i>Más populares
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="goToSlide(1)">
+                        <i class="fas fa-star me-2"></i>Novedades
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="goToSlide(2)">
+                        <i class="fas fa-heart me-2"></i>Recomendados
+                    </button>
                 </div>
             </div>
+        </div>
         </div>
     </section>
 
@@ -1102,18 +1158,18 @@ try {
                                     <h5><?= htmlspecialchars($producto['nombre']) ?></h5>
                                     <p class="text-muted mb-1">Categoría: <?= htmlspecialchars($producto['categoria'] ?? 'Sin categoría') ?></p>
                                     <p class="mb-1"><span class="fw-bold">Precio:</span> <span class="product-price">
-                                        <?php
-                                        $precio = $producto['precio'];
-                                        if ($precio === null || $precio === '' || strtolower($precio) === 'null') {
-                                            echo 'No disponible';
-                                        } else {
-                                            $precioNum = floatval($precio);
-                                            echo '$' . number_format($precioNum, 2);
-                                        }
-                                        ?>
-                                    </span></p>
+                                            <?php
+                                            $precio = $producto['precio'];
+                                            if ($precio === null || $precio === '' || strtolower($precio) === 'null') {
+                                                echo 'No disponible';
+                                            } else {
+                                                $precioNum = floatval($precio);
+                                                echo '$' . number_format($precioNum, 2);
+                                            }
+                                            ?>
+                                        </span></p>
                                     <p class="mb-1"><span class="fw-bold">Stock:</span> <?= htmlspecialchars($producto['stock']) ?></p>
-                                    <?php 
+                                    <?php
                                     $nombreTienda = '';
                                     if (!empty($producto['vendedor_id'])) {
                                         $tiendaTmp = (new TiendaModel())->obtenerTiendaPorUsuarioId($producto['vendedor_id']);
@@ -1194,82 +1250,87 @@ try {
                 <p class="lead text-muted">Conoce a nuestros mejores vendedores</p>
             </div>
             <style>
-            /* Tienda destacada: bordes más redondeados y sin badge */
-            .featured-store-card {
-                min-height: 370px;
-                max-width: 340px;
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: flex-start;
-                background: #fff;
-                border-radius: 48px;
-                box-shadow: 0 8px 32px rgba(80,120,180,0.13), 0 2px 8px rgba(80,80,80,0.07);
-                margin-left: auto;
-                margin-right: auto;
-                margin-bottom: 2.2rem;
-                border: 1.5px solid #e3eaff;
-                overflow: hidden;
-                position: relative;
-                transition: all 0.35s cubic-bezier(.17,.67,.83,.67);
-            }
-            .featured-store-card:hover {
-                transform: translateY(-10px) scale(1.03) rotate(-1deg);
-                box-shadow: 0 24px 60px rgba(45,68,170,0.18), 0 2px 12px rgba(106,130,251,0.13);
-                border-color: #6a82fb;
-            }
-            .featured-store-card .product-image {
-                width: 100%;
-                height: 180px;
-                background: linear-gradient(135deg, #e3eaff 0%, #fff 100%);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-                border-top-left-radius: 48px;
-                border-top-right-radius: 48px;
-                overflow: hidden;
-            }
-            .featured-store-card .product-info {
-                flex: 1 1 auto;
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: flex-start;
-                padding: 1.1rem 1.2rem 1.2rem 1.2rem;
-            }
-            .featured-store-card .store-title {
-                font-size: 1.22rem;
-                font-weight: 800;
-                color: #1a2236;
-                margin-bottom: 0.4rem;
-                letter-spacing: 0.01em;
-                text-align: center;
-                min-height: 2.7em;
-                max-height: 2.7em;
-                line-height: 1.35em;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .featured-store-card .store-desc {
-                font-size: 0.98rem;
-                color: #6a6a7a;
-                margin-bottom: 0.7rem;
-                min-height: 2.1em;
-                max-height: 2.1em;
-                line-height: 1.05em;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                text-align: center;
-            }
+                /* Tienda destacada: bordes más redondeados y sin badge */
+                .featured-store-card {
+                    min-height: 370px;
+                    max-width: 340px;
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: flex-start;
+                    background: #fff;
+                    border-radius: 48px;
+                    box-shadow: 0 8px 32px rgba(80, 120, 180, 0.13), 0 2px 8px rgba(80, 80, 80, 0.07);
+                    margin-left: auto;
+                    margin-right: auto;
+                    margin-bottom: 2.2rem;
+                    border: 1.5px solid #e3eaff;
+                    overflow: hidden;
+                    position: relative;
+                    transition: all 0.35s cubic-bezier(.17, .67, .83, .67);
+                }
+
+                .featured-store-card:hover {
+                    transform: translateY(-10px) scale(1.03) rotate(-1deg);
+                    box-shadow: 0 24px 60px rgba(45, 68, 170, 0.18), 0 2px 12px rgba(106, 130, 251, 0.13);
+                    border-color: #6a82fb;
+                }
+
+                .featured-store-card .product-image {
+                    width: 100%;
+                    height: 180px;
+                    background: linear-gradient(135deg, #e3eaff 0%, #fff 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    position: relative;
+                    border-top-left-radius: 48px;
+                    border-top-right-radius: 48px;
+                    overflow: hidden;
+                }
+
+                .featured-store-card .product-info {
+                    flex: 1 1 auto;
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: flex-start;
+                    padding: 1.1rem 1.2rem 1.2rem 1.2rem;
+                }
+
+                .featured-store-card .store-title {
+                    font-size: 1.22rem;
+                    font-weight: 800;
+                    color: #1a2236;
+                    margin-bottom: 0.4rem;
+                    letter-spacing: 0.01em;
+                    text-align: center;
+                    min-height: 2.7em;
+                    max-height: 2.7em;
+                    line-height: 1.35em;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .featured-store-card .store-desc {
+                    font-size: 0.98rem;
+                    color: #6a6a7a;
+                    margin-bottom: 0.7rem;
+                    min-height: 2.1em;
+                    max-height: 2.1em;
+                    line-height: 1.05em;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    text-align: center;
+                }
             </style>
             <div class="row g-4 justify-content-center">
                 <?php if (empty($tiendas)): ?>
@@ -1324,6 +1385,22 @@ try {
         </div>
     </section>
 
+    <section class="stats-section">
+        <div class="container">
+            <div class="row">
+                <!-- Tarjeta de visitas -->
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="stats-number">
+                            <?php echo $visitas; ?>
+                        </div>
+                        <p>Visualizacion de la pagina</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer Moderno -->
     <footer class="footer-modern">
         <div class="container">
@@ -1338,7 +1415,7 @@ try {
                         <a href="#"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
-                
+
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h5>Marketplace</h5>
                     <ul class="footer-links list-unstyled">
@@ -1348,7 +1425,7 @@ try {
                         <li><a href="#">Ofertas</a></li>
                     </ul>
                 </div>
-                
+
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h5>Soporte</h5>
                     <ul class="footer-links list-unstyled">
@@ -1363,7 +1440,7 @@ try {
                         <li><a href="../views/Support Center/aviso_privacidad.php" target="_blank">Aviso de Privacidad</a></li>
                     </ul>
                 </div>
-                
+
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h5>Empresa</h5>
                     <ul class="footer-links list-unstyled">
@@ -1373,7 +1450,7 @@ try {
                         <li><a href="#">Blog</a></li>
                     </ul>
                 </div>
-                
+
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h5>Legal</h5>
                     <ul class="footer-links list-unstyled">
@@ -1384,9 +1461,9 @@ try {
                     </ul>
                 </div>
             </div>
-            
+
             <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
-            
+
             <div class="text-center">
                 <p class="text-muted">&copy; 2025 Mextium. Todos los derechos reservados.</p>
             </div>
@@ -1394,55 +1471,57 @@ try {
     </footer>
 
     <!-- Scripts -->
-</style>
+    </style>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-// Notificación flotante
-function mostrarNotificacion(mensaje, exito = true) {
-    let notif = document.createElement('div');
-    notif.textContent = mensaje;
-    notif.style.position = 'fixed';
-    notif.style.top = '30px';
-    notif.style.right = '30px';
-    notif.style.zIndex = 9999;
-    notif.style.background = exito ? 'linear-gradient(90deg,#00d4aa,#5FAAFF)' : '#ff6b6b';
-    notif.style.color = '#fff';
-    notif.style.padding = '1rem 2rem';
-    notif.style.borderRadius = '30px';
-    notif.style.boxShadow = '0 4px 18px rgba(95,170,255,0.13)';
-    notif.style.fontWeight = '700';
-    notif.style.fontSize = '1.05rem';
-    notif.style.opacity = '0.97';
-    document.body.appendChild(notif);
-    setTimeout(() => {
-        notif.style.transition = 'opacity 0.5s';
-        notif.style.opacity = '0';
-        setTimeout(() => notif.remove(), 500);
-    }, 1800);
-}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Notificación flotante
+        function mostrarNotificacion(mensaje, exito = true) {
+            let notif = document.createElement('div');
+            notif.textContent = mensaje;
+            notif.style.position = 'fixed';
+            notif.style.top = '30px';
+            notif.style.right = '30px';
+            notif.style.zIndex = 9999;
+            notif.style.background = exito ? 'linear-gradient(90deg,#00d4aa,#5FAAFF)' : '#ff6b6b';
+            notif.style.color = '#fff';
+            notif.style.padding = '1rem 2rem';
+            notif.style.borderRadius = '30px';
+            notif.style.boxShadow = '0 4px 18px rgba(95,170,255,0.13)';
+            notif.style.fontWeight = '700';
+            notif.style.fontSize = '1.05rem';
+            notif.style.opacity = '0.97';
+            document.body.appendChild(notif);
+            setTimeout(() => {
+                notif.style.transition = 'opacity 0.5s';
+                notif.style.opacity = '0';
+                setTimeout(() => notif.remove(), 500);
+            }, 1800);
+        }
 
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.btn-comprar').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            let productoId = this.getAttribute('data-producto-id');
-            fetch('/mextium/controller/carrito_agregar_controller.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'producto_id=' + encodeURIComponent(productoId) + '&cantidad=1'
-            })
-            .then(res => res.json())
-            .then(function(data) {
-                mostrarNotificacion(data.message, data.success);
-            })
-            .catch(function() {
-                mostrarNotificacion('Error al agregar al carrito', false);
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.btn-comprar').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let productoId = this.getAttribute('data-producto-id');
+                    fetch('/mextium/controller/carrito_agregar_controller.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: 'producto_id=' + encodeURIComponent(productoId) + '&cantidad=1'
+                        })
+                        .then(res => res.json())
+                        .then(function(data) {
+                            mostrarNotificacion(data.message, data.success);
+                        })
+                        .catch(function() {
+                            mostrarNotificacion('Error al agregar al carrito', false);
+                        });
+                });
             });
         });
-    });
-});
-</script>
+    </script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
         // Inicializar AOS
@@ -1471,9 +1550,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     current = target;
                     clearInterval(timer);
                 }
-                element.textContent = Math.floor(current).toLocaleString() + 
-                    (element.textContent.includes('K') ? 'K+' : 
-                     element.textContent.includes('%') ? '%' : '+');
+                element.textContent = Math.floor(current).toLocaleString() +
+                    (element.textContent.includes('K') ? 'K+' :
+                        element.textContent.includes('%') ? '%' : '+');
             }, 20);
         }
 
@@ -1495,7 +1574,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+            anchor.addEventListener('click', function(e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
@@ -1543,11 +1622,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
             `;
-            
+
             document.body.appendChild(modal);
             const bootstrapModal = new bootstrap.Modal(modal);
             bootstrapModal.show();
-            
+
             // Eliminar modal del DOM cuando se cierre
             modal.addEventListener('hidden.bs.modal', () => {
                 document.body.removeChild(modal);
@@ -1555,7 +1634,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Efecto de entrada para botones cuando se cambia de slide
-        document.getElementById('categoriesCarousel').addEventListener('slide.bs.carousel', function () {
+        document.getElementById('categoriesCarousel').addEventListener('slide.bs.carousel', function() {
             // Ocultar botones del slide actual
             const currentSlide = this.querySelector('.carousel-item.active');
             const buttons = currentSlide.querySelectorAll('.category-action');
@@ -1565,7 +1644,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        document.getElementById('categoriesCarousel').addEventListener('slid.bs.carousel', function () {
+        document.getElementById('categoriesCarousel').addEventListener('slid.bs.carousel', function() {
             // Mostrar botones del nuevo slide con delay
             const currentSlide = this.querySelector('.carousel-item.active');
             const buttons = currentSlide.querySelectorAll('.category-action');
@@ -1593,6 +1672,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let cart = JSON.parse(localStorage.getItem('mextium_cart') || '[]');
             return cart.length;
         }
+
         function updateCartCount() {
             document.getElementById('cartCount').textContent = getCartCount();
         }
@@ -1602,6 +1682,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             mostrarCarritoModal();
         });
+
         function mostrarCarritoModal() {
             const modal = document.createElement('div');
             modal.className = 'modal fade';
@@ -1631,4 +1712,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     </script>
 </body>
+
 </html>
