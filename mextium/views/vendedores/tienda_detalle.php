@@ -80,8 +80,19 @@ if ($tienda && isset($tienda['usuario_id'])) {
         $stmt2 = $pdo->prepare("SELECT visitas_tienda FROM vendedores WHERE usuario_id = ?");
         $stmt2->execute([$tienda['usuario_id']]);
         $contadorVisitas = $stmt2->fetchColumn();
+
+        // --- Recuperar compras de la tienda ---
+        $stmt3 = $pdo->prepare("SELECT compras FROM vendedores WHERE usuario_id = ?");
+        $stmt3->execute([$tienda['usuario_id']]);
+        $contadorCompras = $stmt3->fetchColumn();
+
+        // Fallback en caso de null
+        if ($contadorVisitas === false) $contadorVisitas = 0;
+        if ($contadorCompras === false) $contadorCompras = 0;
     } catch (Throwable $e) {
         echo '<div style="padding:2rem;color:orange;">Excepción: ' . htmlspecialchars($e->getMessage()) . '</div>';
+        $contadorVisitas = 0;
+        $contadorCompras = 0;
     }
 }
 
@@ -381,15 +392,28 @@ if ($tienda && isset($tienda['usuario_id'])) {
 
 <body>
     <div class="tienda-header">
-        <div class="card text-white bg-primary"
-            style="position: absolute; top: 10px; right: 10px; width: 200px;">
-            <div class="card-header">Visitas a la Tienda</div>
-            <div class="card-body">
-                <h5 class="card-title">
-                    <?php echo htmlspecialchars($contadorVisitas); ?>
-                </h5>
+        <div class="d-flex justify-content-end mt-3" style="position: absolute; top: 10px; right: 10px; gap: 10px;">
+            <!-- Contador de visitas -->
+            <div class="card text-white bg-primary" style="width: 200px;">
+                <div class="card-header">Visitas a la Tienda</div>
+                <div class="card-body text-center">
+                    <h5 class="card-title mb-0">
+                        <?php echo htmlspecialchars($contadorVisitas); ?>
+                    </h5>
+                </div>
+            </div>
+
+            <!-- Contador de compras (rojo claro) -->
+            <div class="card text-white" style="width: 200px; background-color: #f28b82;">
+                <div class="card-header">Compras realizadas</div>
+                <div class="card-body text-center">
+                    <h5 class="card-title mb-0">
+                        <?php echo htmlspecialchars($contadorCompras); ?>
+                    </h5>
+                </div>
             </div>
         </div>
+
         <img class="store-img" src="<?php echo !empty($tienda['imagen']) ? ('/mextium/' . ltrim($tienda['imagen'], '/')) : '../no-image.png'; ?>" alt="Imagen de la tienda">
         <h1>
             <?php echo htmlspecialchars($tienda['nombre_tienda']); ?>
