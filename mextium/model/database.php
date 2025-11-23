@@ -1,9 +1,9 @@
 <?php
 
-$host = "localhost";
-$db = "mextium";
-$user = "root";
-$pass = "";
+$host = "82.197.82.93";
+$db = "u366162802_mextium";
+$user = "u366162802_santiago";
+$pass = "vU7=5WEQXw";
 $charset = "utf8mb4";
 
 class Database {
